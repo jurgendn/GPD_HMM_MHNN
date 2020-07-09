@@ -157,7 +157,7 @@ Tên hàm, biến có ý nghĩa, không đặt những tên không chỉ mục �
 ```python
 # Correct
 
-max_ite = 100	# no more than 100 loops
+MAX_ITE = 100	# no more than 100 loops
 ite				# current iteration
 
 
