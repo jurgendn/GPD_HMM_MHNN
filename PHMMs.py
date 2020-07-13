@@ -97,7 +97,7 @@ class PHMMs:
 	If they dont have significant different, return true
 	"""
 
-    def likelihood_function(self, tol=1e-100):  # P(O|lambda)=prob_O
+    def CDLL(self, tol=1e-100):  # P(O|lambda)=prob_O
         forward_probability = self.matrix_alpha()
         CDLL = np.exp(logsumexp(forward_probability[-1]))
         return CDLL
@@ -165,14 +165,14 @@ class PHMMs:
     def update_init_ditri(self):
         temp1 = self.matrix_alpha()
         temp2 = self.matrix_beta()
-        L_T = self.likelihood_function()
+        L_T = self.CDLL()
         for i in range(self.nber_states):
             self.log_init_ditri[i] = temp1[0][i]+temp2[0][i]-np.log(L_T)
         return True
 
-    def Baum_Welch(self, max_iter=10):
+    def Baum_Welch(self, max_iter=100):
         for _ in range(max_iter):
-            pre_L_T = self.likelihood_function()
+            pre_L_T = self.CDLL()
             # update trans_matrix
             for i in range(self.nber_states):
                 for j in range(self.nber_states):
@@ -184,14 +184,14 @@ class PHMMs:
                     i)/(np.exp(self.denominator_update(i)))
             # update init_ditri
             self.update_init_ditri()
-            current_L_T = self.likelihood_function()
+            current_L_T = self.CDLL()
             print("Current CDLL: ", current_L_T)
-            if (current_L_T) < np.exp(self.epsi)*pre_L_T and current_L_T > pre_L_T:
+            if current_L_T < self.epsi*pre_L_T and current_L_T > pre_L_T:
                 break
         return True
 
     def AIC(self):
-        return (2*(self.nber_states**2+self.nber_states) - 2*self.likelihood_function())
+        return (2*(self.nber_states**2+self.nber_states) - 2*self.CDLL())
 
     def BIC(self):
-        return ((self.nber_states**2+self.nber_states)*np.log(len(self.ob_seqs)) - 2*self.likelihood_function())
+        return ((self.nber_states**2+self.nber_states)*np.log(len(self.ob_seqs)) - 2*self.CDLL())
