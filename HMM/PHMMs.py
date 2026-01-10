@@ -74,37 +74,16 @@ class PHMMs:
         beta_matrix.reverse()
         seterr(divide='warn')
         return np.array(beta_matrix)
-<<<<<<< HEAD
-
-    """
-	Calculate L_T by 2 method
-	- By forward algorithm
-	- By backward algorithm
-	If they dont have significant different, return true
-	"""
-
-    def CDLL(self, tol=1e-100):  # P(O|lambda)=prob_O
-        forward_probability = self.matrix_alpha()
-        CDLL = np.exp(logsumexp(forward_probability[-1]))
-        return CDLL
-
-    def viterbi(self):
-        v_n = [0.0 for _ in range(self.nber_states)]
-        vlst = [v_n]
-        wlst = []
-        for i in range(len(self.ob_seqs)-1, 0, -1):
-=======
     def check(self):#P(O|lambda)=prob_O
         temp1=self.matrix_alpha()
         temp2=self.matrix_beta()
         prob_O_directly=logsumexp(temp1[-1])
         return prob_O_directly
-    def vterbi(self):
+    def viterbi(self):
         v_n=[0.0 for _ in range(self.nber_states)]
         vlst=[v_n]
         wlst=[]
         for i in range(len(self.ob_seqs)-1,0,-1):
->>>>>>> 5717049ae6ba21489d52e2f55a6f4a800c121f11
             v_i = []
             w_i = []
             for j in range(self.nber_states):
@@ -127,65 +106,6 @@ class PHMMs:
         for i in range(len(wlst)):
             statelst.append(wlst[i][statelst[-1]])
         return statelst
-<<<<<<< HEAD
-
-    def numerator_update_trans(self, i, j):
-        temp1 = self.matrix_alpha()
-        temp2 = self.matrix_beta()
-        C = 0
-        for t in range(len(self.ob_seqs)-1):
-            A = temp1[t][i]+self.log_init_trans_matrix[i, j]+self.log_prob_Poisson(
-                self.set_paramPoisson[j], self.ob_seqs[t+1])+temp2[t+1][j]
-            B = np.exp(A)
-            C = C+B
-        return np.log(C)
-
-    def denominator_update(self, i):
-        temp1 = self.matrix_alpha()
-        temp2 = self.matrix_beta()
-        C = 0
-        for t in range(len(self.ob_seqs)-1):
-            A = temp1[t][i]+temp2[t][i]
-            B = np.exp(A)
-            C = C+B
-        return np.log(C)
-
-    def numerator_update_lambda(self, i):
-        temp1 = self.matrix_alpha()
-        temp2 = self.matrix_beta()
-        C = 0
-        for t in range(len(self.ob_seqs)-1):
-            A = temp1[t][i]+temp2[t][i]
-            B = np.exp(A)*self.ob_seqs[t]
-            C = C+B
-        return C
-
-    def update_init_ditri(self):
-        temp1 = self.matrix_alpha()
-        temp2 = self.matrix_beta()
-        L_T = self.CDLL()
-        for i in range(self.nber_states):
-            self.log_init_ditri[i] = temp1[0][i]+temp2[0][i]-np.log(L_T)
-        return True
-
-    def Baum_Welch(self, max_iter=100):
-        for _ in range(max_iter):
-            pre_L_T = self.CDLL()
-            # update trans_matrix
-            for i in range(self.nber_states):
-                for j in range(self.nber_states):
-                    self.log_init_trans_matrix[i, j] = self.numerator_update_trans(
-                        i, j)-self.denominator_update(i)
-            # update paramPoisson
-            for i in range(self.nber_states):
-                self.set_paramPoisson[i] = self.numerator_update_lambda(
-                    i)/(np.exp(self.denominator_update(i)))
-            # update init_ditri
-            self.update_init_ditri()
-            current_L_T = self.CDLL()
-            print("Current CDLL: ", current_L_T)
-            if current_L_T < self.epsi*pre_L_T and current_L_T > pre_L_T:
-=======
     
     
     def matrix_emission(self):
@@ -265,7 +185,10 @@ class PHMMs:
             #update set_param:
             print("-----lambda------")
             for i in range(N):
-                new_param[i]=np.exp(self.numerator_update_lambda(i,alpha_matrix,beta_matrix)-self.denominator_update_lambda(i,alpha_matrix,beta_matrix))
+                new_param[i] = np.exp(
+                    self.numerator_update_lambda(i, alpha_matrix, beta_matrix)
+                    - self.denominator_update_lambda(i, alpha_matrix, beta_matrix)
+                )
             print("lambda o vong lap",itere,new_param)
             #update init_ditri
             print("----init-----")
@@ -278,16 +201,9 @@ class PHMMs:
             log_current_LT=self.check()
             print("different giữa 2 cái log:",log_current_LT-log_pre_L_T)
             if 0<log_current_LT-log_pre_L_T<1e-10:
->>>>>>> 5717049ae6ba21489d52e2f55a6f4a800c121f11
                 break
 
     def AIC(self):
-<<<<<<< HEAD
-        return (2*(self.nber_states**2+self.nber_states) - 2*self.CDLL())
-
-    def BIC(self):
-        return ((self.nber_states**2+self.nber_states)*np.log(len(self.ob_seqs)) - 2*self.CDLL())
-=======
         return (2*(self.nber_states**2) - 2*self.check())
 
     def BIC(self):
@@ -328,4 +244,3 @@ print(test.check())
 print("----------")
 print("AIC:",test.AIC())
 print("BIC:",test.BIC())
->>>>>>> 5717049ae6ba21489d52e2f55a6f4a800c121f11
