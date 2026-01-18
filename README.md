@@ -92,29 +92,38 @@ Depending on your data and goals, you may also consider:
 ## Getting started
 1) Environment
 - Python 3.9+ recommended.
-- Install dependencies:
+- Create a virtual environment and install minimal dependencies:
   ```bash
+  python -m venv .venv
+  source .venv/bin/activate   # on Windows: .venv\\Scripts\\activate
+  pip install --upgrade pip
   pip install numpy scipy matplotlib
   ```
 
-2) Run the demo
-- Execute the script to train PHMMs with up to *m* states (default 4) for *iter* EM iterations each:
+2) Run the demo (CLI)
+- The CLI is a thin entrypoint that uses helpers in HMM/utils.py.
+- Default example (uses data/traffic count.csv):
   ```bash
-  python exec_model.py --data "data/traffic count.csv" --m 7 --iter 30
+  python exec_model.py --data "data/traffic count.csv" --m 4 --iter 10
   ```
 
-- You can also pass a headerless single-column series (one number per line), e.g.:
-  ```bash
-  python exec_model.py --data "data/covid_19_us.csv" --m 4 --iter 20
-  ```
+- Common options (see exec_model.py):
+  - --data PATH        Path to CSV (default: data/traffic count.csv)
+  - --m INT            Train models with 1..m states (default: 4)
+  - --iter INT         Baum–Welch iterations per model (default: 10)
+  - --train-end INT    Training split end index (default: 180)
+  - --test-start INT   Test split start index (default: 181)
+
+- For reproducible experiments, use the programmatic API in HMM.utils (generate_init / phmm) which accepts an optional seed parameter. See HMM/utils.py for details.
 
 3) Outputs
-- `AIC-BIC.png` — information criteria across state counts.
-- `CDLL.png` — log-likelihood trace per model.
-- `vsdata.png` — raw observation series.
-- `visualized.png` — training fit: observed vs. regime-conditional means.
-- `TSC.png` — test-segment states vs. new observations.
-- Console prints: AIC/BIC arrays, dwell-time estimates (1/(1 - p_ii)), estimated Poisson rates, transition matrix.
+- Running the demo writes files to the repository root:
+  - AIC-BIC.png — information criteria across state counts
+  - CDLL.png — log-likelihood trace per model
+  - vsdata.png — raw observation series
+  - visualized.png — training fit: observed vs. regime-conditional means
+  - TSC.png — test-segment states vs. new observations
+- The script also prints AIC/BIC arrays, estimated Poisson rates, the transition matrix, and dwell-time estimates to the console.
 
 ## How the script works (high level)
 - Loads the 1D traffic series `OBS_SERIES` embedded in [exec_model.py](exec_model.py).
