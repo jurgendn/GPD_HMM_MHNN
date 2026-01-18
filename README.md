@@ -13,7 +13,7 @@ This repository accompanies the report on modeling over-dispersed count time ser
 - Ships a sample traffic-count series (see [data](data)) extracted from NYC roadway sensors to illustrate overdispersion and regime switching.
 
 ## Background (from the report)
-- Overdispersion: many count series satisfy $\\mathrm{Var}(X) > \\mathbb{E}[X]$, violating the Poisson equality $\\mathrm{Var}(X)=\\mathbb{E}[X]$.
+- Overdispersion: many count series satisfy $\mathrm{Var}(X) > \mathbb{E}[X]$, violating the Poisson equality $\\mathrm{Var}(X)=\\mathbb{E}[X]$.
 - PHMM idea: combine a discrete latent Markov chain with state-specific Poisson rates. The resulting Poisson mixture naturally inflates variance and captures temporal regime changes.
 - Key algorithms: Forward/Backward for likelihood, Viterbi for decoding, Baum–Welch (EM) for parameter updates. Model selection relies on AIC/BIC; dwell times come from self-transition probabilities.
 - Empirical finding: 4–7 states fit the traffic data well; a 7-state model balances likelihood, information criteria, and interpretability (distinct congestion regimes).
@@ -33,12 +33,12 @@ The complete parameter set is $\theta = (\pi, A, \lambda)$.
 
 ### Why PHMMs explain overdispersion
 
-Even though each state-wise Poisson has $\operatorname{Var}(Y_t\mid S_t)=\operatorname{E}(Y_t\mid S_t)=\lambda_{S_t}$, the marginal variance includes a mixture term:
+Even though each state-wise Poisson has $\mathrm{Var}(Y_t\mid S_t)=\mathrm{E}(Y_t\mid S_t)=\lambda_{S_t}$, the marginal variance includes a mixture term:
 
-$$\operatorname{Var}(Y_t)=\operatorname{E}[\operatorname{Var}(Y_t\mid S_t)]+\operatorname{Var}(\operatorname{E}[Y_t\mid S_t])
-=\operatorname{E}[\lambda_{S_t}] + \operatorname{Var}(\lambda_{S_t})$$
+$$\mathrm{Var}(Y_t)=\mathrm{E}[\mathrm{Var}(Y_t\mid S_t)]+\mathrm{Var}(\mathrm{E}[Y_t\mid S_t])
+=\mathrm{E}[\lambda_{S_t}] + \mathrm{Var}(\lambda_{S_t})$$
 
-So whenever multiple regimes have different rates (i.e., $\operatorname{Var}(\lambda_{S_t})>0$), the marginal variance exceeds the marginal mean.
+So whenever multiple regimes have different rates (i.e., $\mathrm{Var}(\lambda_{S_t})>0$), the marginal variance exceeds the marginal mean.
 
 ### Inference algorithms used here
 
