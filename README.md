@@ -13,7 +13,7 @@ This repository accompanies the report on modeling over-dispersed count time ser
 - Ships a sample traffic-count series (see [data](data)) extracted from NYC roadway sensors to illustrate overdispersion and regime switching.
 
 ## Background (from the report)
-- Overdispersion: many count series satisfy $\operatorname{Var}(X) > \operatorname{E}[X]$, violating the Poisson equality $\operatorname{Var}(X)=\operatorname{E}[X]$.
+- Overdispersion: many count series satisfy $\mathrm{Var}(X) > \mathrm{E}[X]$, violating the Poisson equality $\mathrm{Var}(X)=\mathrm{E}[X]$.
 - PHMM idea: combine a discrete latent Markov chain with state-specific Poisson rates. The resulting Poisson mixture naturally inflates variance and captures temporal regime changes.
 - Key algorithms: Forward/Backward for likelihood, Viterbi for decoding, Baum–Welch (EM) for parameter updates. Model selection relies on AIC/BIC; dwell times come from self-transition probabilities.
 - Empirical finding: 4–7 states fit the traffic data well; a 7-state model balances likelihood, information criteria, and interpretability (distinct congestion regimes).
@@ -33,12 +33,12 @@ The complete parameter set is $\theta = (\pi, A, \lambda)$.
 
 ### Why PHMMs explain overdispersion
 
-Even though each state-wise Poisson has $\operatorname{Var}(Y_t\mid S_t)=\operatorname{E}(Y_t\mid S_t)=\lambda_{S_t}$, the marginal variance includes a mixture term:
+Even though each state-wise Poisson has $\mathrm{Var}(Y_t\mid S_t)=\mathrm{E}(Y_t\mid S_t)=\lambda_{S_t}$, the marginal variance includes a mixture term:
 
-$$\operatorname{Var}(Y_t)=\operatorname{E}[\operatorname{Var}(Y_t\mid S_t)]+\operatorname{Var}(\operatorname{E}[Y_t\mid S_t])
-=\operatorname{E}[\lambda_{S_t}] + \operatorname{Var}(\lambda_{S_t})$$
+$$\mathrm{Var}(Y_t)=\mathrm{E}[\mathrm{Var}(Y_t\mid S_t)]+\mathrm{Var}(\mathrm{E}[Y_t\mid S_t])
+=\mathrm{E}[\lambda_{S_t}] + \mathrm{Var}(\lambda_{S_t})$$
 
-So whenever multiple regimes have different rates (i.e., $\operatorname{Var}(\lambda_{S_t})>0$), the marginal variance exceeds the marginal mean.
+So whenever multiple regimes have different rates (i.e., $\mathrm{Var}(\lambda_{S_t})>0$), the marginal variance exceeds the marginal mean.
 
 ### Inference algorithms used here
 
@@ -67,7 +67,7 @@ This repo reports AIC/BIC across $N=1..m$ states.
 
 If $A_{ii}$ is the self-transition probability, the expected number of consecutive steps spent in state $i$ is:
 
-$$\operatorname{E}[\text{dwell}_i] = \frac{1}{1-A_{ii}}$$
+$$\mathrm{E}[\text{dwell}_i] = \frac{1}{1-A_{ii}}$$
 
 This is the quantity printed by [exec_model.py](exec_model.py) after training.
 
@@ -75,7 +75,7 @@ This is the quantity printed by [exec_model.py](exec_model.py) after training.
 
 Depending on your data and goals, you may also consider:
 
-- Negative Binomial (NB): handles overdispersion via an extra dispersion parameter, e.g. $Y\sim\text{NB}(r,p)$ with $\operatorname{Var}(Y)=\mu+\mu^2/r$.
+- Negative Binomial (NB): handles overdispersion via an extra dispersion parameter, e.g. $Y\sim\text{NB}(r,p)$ with $\mathrm{Var}(Y)=\mu+\mu^2/r$.
 - NB-HMM: same latent Markov structure as PHMM but with NB emissions (often more robust when overdispersion is not mainly “regime switching”).
 - Zero-inflated Poisson (ZIP): mixture for excess zeros, $Y\sim\begin{cases}0 & \text{w.p. }\psi\\ \text{Poisson}(\lambda) & \text{w.p. }1-\psi\end{cases}$.
 - Poisson regression / GLM: $Y_t\sim\text{Poisson}(\lambda_t)$ with $\log \lambda_t = x_t^\top\beta$ (covariate-driven intensity).
