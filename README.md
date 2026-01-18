@@ -67,7 +67,7 @@ This repo reports AIC/BIC across $N=1..m$ states.
 
 If $A_{ii}$ is the self-transition probability, the expected number of consecutive steps spent in state $i$ is:
 
-$$\operatorname{E}[\text{dwell}_i] = \frac{1}{1-A_{ii}}$$
+$$\mathrm{E}[\text{dwell}_i] = \frac{1}{1-A_{ii}}$$
 
 This is the quantity printed by [exec_model.py](exec_model.py) after training.
 
@@ -75,7 +75,7 @@ This is the quantity printed by [exec_model.py](exec_model.py) after training.
 
 Depending on your data and goals, you may also consider:
 
-- Negative Binomial (NB): handles overdispersion via an extra dispersion parameter, e.g. $Y\sim\text{NB}(r,p)$ with $\operatorname{Var}(Y)=\mu+\mu^2/r$.
+- Negative Binomial (NB): handles overdispersion via an extra dispersion parameter, e.g. $Y\sim\text{NB}(r,p)$ with $\mathrm{Var}(Y)=\mu+\mu^2/r$.
 - NB-HMM: same latent Markov structure as PHMM but with NB emissions (often more robust when overdispersion is not mainly “regime switching”).
 - Zero-inflated Poisson (ZIP): mixture for excess zeros:
   $$Y\sim\begin{cases}0 & \text{w.p. }\psi\\ \text{Poisson}(\lambda) & \text{w.p. }1-\psi\end{cases}$$
