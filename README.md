@@ -13,7 +13,7 @@ This repository accompanies the report on modeling over-dispersed count time ser
 - Ships a sample traffic-count series (see [data](data)) extracted from NYC roadway sensors to illustrate overdispersion and regime switching.
 
 ## Background (from the report)
-- Overdispersion: many count series satisfy $\operatorname{Var}(X) > \operatorname{E}[X]$, violating the Poisson equality $\operatorname{Var}(X)=\operatorname{E}[X]$.
+- Overdispersion: many count series satisfy $\\mathrm{Var}(X) > \\mathbb{E}[X]$, violating the Poisson equality $\\mathrm{Var}(X)=\\mathbb{E}[X]$.
 - PHMM idea: combine a discrete latent Markov chain with state-specific Poisson rates. The resulting Poisson mixture naturally inflates variance and captures temporal regime changes.
 - Key algorithms: Forward/Backward for likelihood, Viterbi for decoding, Baum–Welch (EM) for parameter updates. Model selection relies on AIC/BIC; dwell times come from self-transition probabilities.
 - Empirical finding: 4–7 states fit the traffic data well; a 7-state model balances likelihood, information criteria, and interpretability (distinct congestion regimes).
@@ -77,7 +77,8 @@ Depending on your data and goals, you may also consider:
 
 - Negative Binomial (NB): handles overdispersion via an extra dispersion parameter, e.g. $Y\sim\text{NB}(r,p)$ with $\operatorname{Var}(Y)=\mu+\mu^2/r$.
 - NB-HMM: same latent Markov structure as PHMM but with NB emissions (often more robust when overdispersion is not mainly “regime switching”).
-- Zero-inflated Poisson (ZIP): mixture for excess zeros, $Y\sim\begin{cases}0 & \text{w.p. }\psi\\ \text{Poisson}(\lambda) & \text{w.p. }1-\psi\end{cases}$.
+- Zero-inflated Poisson (ZIP): mixture for excess zeros:
+  $$Y\sim\begin{cases}0 & \text{w.p. }\psi\\ \text{Poisson}(\lambda) & \text{w.p. }1-\psi\end{cases}$$
 - Poisson regression / GLM: $Y_t\sim\text{Poisson}(\lambda_t)$ with $\log \lambda_t = x_t^\top\beta$ (covariate-driven intensity).
 - Markov-modulated Poisson process (MMPP): continuous-time analogue of PHMM-like regime switching.
 - Self-exciting processes (e.g., Hawkes): for event clustering/contagion dynamics rather than piecewise-stationary regimes.
