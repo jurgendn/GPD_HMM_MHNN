@@ -6,8 +6,8 @@ notebook-generated script but simplified for researcher use.
 """
 
 import argparse
-from typing import Optional
 from pathlib import Path
+from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,6 +33,7 @@ PAD_INCHES = 0.1
 
 
 def configure_style() -> None:
+    """Configure matplotlib style with fallback options."""
     try:
         plt.style.use("seaborn-v0_8")
     except Exception:
@@ -58,17 +59,12 @@ def generate_predict(state_sequence: list[int], rate_vector: np.ndarray) -> list
 
 
 def get_model_predictions(
-    model, obs_series: np.ndarray,
+    model: Any, obs_series: np.ndarray,
 ) -> tuple[list[int], list[int], list[float]]:
-    # Accept any model with the expected attributes (duck-typed at runtime)
-    # Avoid static reference to PHMMs to keep runtime imports simple
+    """Extract Viterbi path and predictions for a model.
 
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        from HMM.PHMMs_fixed import PHMMs  # type: ignore
-
-    """Extract Viterbi path and predictions for a model."""
+    Accept any model with the expected attributes (duck-typed at runtime).
+    """
     model.ob_seqs = np.array(obs_series)
     path = model.viterbi()
     predictions = generate_predict(path, model.set_paramPoisson)
@@ -79,13 +75,13 @@ def get_model_predictions(
 # ============================================================================
 # Core Plot Functions
 # ============================================================================
-def plot_aic_bic(AIC: list[float], BIC: list[float]) -> None:
+def plot_aic_bic(aic: list[float], bic: list[float]) -> None:
     """Plot combined AIC/BIC, plus individual plots."""
-    x_vals = list(range(1, len(AIC) + 1))
+    x_vals = list(range(1, len(aic) + 1))
 
     plt.figure(figsize=(10, 6))
-    plt.plot(x_vals, AIC, c="g", linewidth=1.5, marker="o", label="AIC", markersize=5, alpha=0.6)
-    plt.plot(x_vals, BIC, c="r", linewidth=1.5, marker="p", label="BIC", markersize=5, alpha=0.6)
+    plt.plot(x_vals, aic, c="g", linewidth=1.5, marker="o", label="AIC", markersize=5, alpha=0.6)
+    plt.plot(x_vals, bic, c="r", linewidth=1.5, marker="p", label="BIC", markersize=5, alpha=0.6)
     plt.xlabel("Number of States", fontsize=FONTSIZE_LABEL, fontweight="bold")
     plt.ylabel("Value", fontsize=FONTSIZE_LABEL, fontweight="bold")
     plt.title(
@@ -99,7 +95,7 @@ def plot_aic_bic(AIC: list[float], BIC: list[float]) -> None:
     plt.savefig("images/AIC-BIC.png", dpi=DPI, pad_inches=PAD_INCHES, bbox_inches="tight")
 
     plt.figure(figsize=(10, 6))
-    plt.plot(x_vals, AIC, c="g", linewidth=1.5, marker="o", label="AIC", markersize=5, alpha=0.6)
+    plt.plot(x_vals, aic, c="g", linewidth=1.5, marker="o", label="AIC", markersize=5, alpha=0.6)
     plt.xlabel("Number of States", fontsize=FONTSIZE_LABEL, fontweight="bold")
     plt.ylabel("AIC", fontsize=FONTSIZE_LABEL, fontweight="bold")
     plt.title("Akaike Information Criterion (AIC)", fontsize=FONTSIZE_TITLE, fontweight="bold")
@@ -109,7 +105,7 @@ def plot_aic_bic(AIC: list[float], BIC: list[float]) -> None:
     plt.savefig("images/AIC.png", dpi=DPI, pad_inches=PAD_INCHES, bbox_inches="tight")
 
     plt.figure(figsize=(10, 6))
-    plt.plot(x_vals, BIC, c="r", linewidth=1.5, marker="p", label="BIC", markersize=5, alpha=0.6)
+    plt.plot(x_vals, bic, c="r", linewidth=1.5, marker="p", label="BIC", markersize=5, alpha=0.6)
     plt.xlabel("Number of States", fontsize=FONTSIZE_LABEL, fontweight="bold")
     plt.ylabel("BIC", fontsize=FONTSIZE_LABEL, fontweight="bold")
     plt.title("Bayesian Information Criterion (BIC)", fontsize=FONTSIZE_TITLE, fontweight="bold")
@@ -163,7 +159,7 @@ def plot_raw_data(observations: np.ndarray) -> None:
 # Single Model Plots
 # ============================================================================
 def plot_training_prediction(
-    model, obs_series: np.ndarray, time_axis: list[int], phase: str = "train",
+    model: Any, obs_series: np.ndarray, time_axis: list[int], phase: str = "train",
 ) -> None:
     """Plot observed vs predicted for a single model on a phase."""
     path, predictions, _ = get_model_predictions(model, obs_series)
@@ -182,7 +178,7 @@ def plot_training_prediction(
     )
 
 
-def plot_test_states(model, idx: int, obs_series: np.ndarray, phase: str = "test") -> None:
+def plot_test_states(model: Any, idx: int, obs_series: np.ndarray, phase: str = "test") -> None:
     """Plot hidden state means vs observations for a single model."""
     path, _, state_means = get_model_predictions(model, obs_series)
 
@@ -207,7 +203,9 @@ def plot_test_states(model, idx: int, obs_series: np.ndarray, phase: str = "test
     plt.xlabel("Time Index", fontsize=FONTSIZE_LABEL, fontweight="bold")
     plt.ylabel("Count Value", fontsize=FONTSIZE_LABEL, fontweight="bold")
     plt.title(
-        f"Test States vs New Observations (Model {idx})", fontsize=FONTSIZE_TITLE, fontweight="bold",
+        f"Test States vs New Observations (Model {idx})",
+        fontsize=FONTSIZE_TITLE,
+        fontweight="bold",
     )
     plt.legend(fontsize=FONTSIZE_LEGEND, loc="best", frameon=True, shadow=True)
     plt.grid(True, alpha=0.3)
@@ -273,7 +271,11 @@ def plot_multi_model_subplots(
     """Plot predictions or hidden states from multiple models in subplots.
 
     Args:
-        plot_type: "predictions" (model predictions) or "hidden_states" (state means as horizontal lines)
+        models: List of trained models.
+        idx_list: Indices of models to plot.
+        obs_series: Observation series to overlay.
+        plot_type: Type of plot (predictions or hidden_states).
+        phase: Phase identifier for output filename.
     """
     if idx_list is None:
         idx_list = list(range(len(models)))
@@ -367,7 +369,7 @@ def report_dwell_times(matrix: np.ndarray) -> None:
         print(f"State {i} dwell time: {dwell_time:.3f}")
 
 
-def report_model_summary(model, model_idx: int) -> None:
+def report_model_summary(model: Any, model_idx: int) -> None:
     """Print summary of model parameters."""
     print(f"\n{'=' * 60}")
     print(f"Model {model_idx} Summary")
@@ -385,6 +387,7 @@ def report_model_summary(model, model_idx: int) -> None:
 # CLI & Main
 # ============================================================================
 def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description="Run PHMM models and visualize results")
     parser.add_argument(
         "--data",
@@ -410,6 +413,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Run PHMM training and visualization pipeline."""
     args = parse_args()
     configure_style()
 
@@ -424,11 +428,11 @@ def main() -> None:
     models = run_with_m(args.m, [obs_train], iterations=args.iter)
 
     # Compute information criteria
-    AIC, BIC = compute_aic_bic(models)
-    CDLL = compute_cdll(models)
+    aic, bic = compute_aic_bic(models)
+    cdll = compute_cdll(models)
 
-    print(f"\nAIC: {AIC}")
-    print(f"BIC: {BIC}")
+    print(f"\nAIC: {aic}")
+    print(f"BIC: {bic}")
 
     # ========================================================================
     # Model Selection & Diagnostics
@@ -440,8 +444,8 @@ def main() -> None:
     # Generate Overview Plots
     # ========================================================================
     print("Generating overview plots...")
-    plot_aic_bic(AIC, BIC)
-    plot_cdll(CDLL)
+    plot_aic_bic(aic, bic)
+    plot_cdll(cdll)
     plot_raw_data(obs_series)
 
     # ========================================================================
@@ -461,7 +465,13 @@ def main() -> None:
     # ========================================================================
     # Generate Multi-Model Comparison Plots
     # ========================================================================
-    model_indices = [5, 6, 7, 8]  # Compare a subset of models
+    # Choose which models to compare. Prefer models [5,6,7,8] when available,
+    # otherwise clamp to available indices.
+    preferred = [5, 6, 7, 8]
+    model_indices = [i for i in preferred if i < len(models)]
+    if not model_indices:
+        # Fallback: compare all trained models
+        model_indices = list(range(len(models)))
     print(f"Generating multi-model comparison plots for models {model_indices}...")
 
     # Single plot with all models overlaid
