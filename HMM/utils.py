@@ -1,5 +1,4 @@
-"""
-Lightweight helper utilities for the PHMM package.
+"""Lightweight helper utilities for the PHMM package.
 
 These utilities were extracted from exec_model.py to provide a concise
 researcher-friendly API: loading CSV series, splits, initialization, model
@@ -8,11 +7,12 @@ construction and small helpers used in the demo.
 Only functionality observed in the repository was reimplemented here — no new
 behaviour introduced.
 """
-from pathlib import Path
+
 import csv
+from pathlib import Path
+from typing import List, Tuple, Optional
+
 import numpy as np
-import scipy as sc
-from typing import Tuple, List
 
 
 def load_observation_series(csv_path: str) -> np.ndarray:
@@ -33,6 +33,7 @@ def load_observation_series(csv_path: str) -> np.ndarray:
     with path.open("r", encoding="utf-8-sig") as f_plain:
         lines = [ln.strip() for ln in f_plain.readlines() if ln.strip() != ""]
     if lines:
+
         def _parse_numeric_token(token: str) -> int:
             return int(float(token))
 
@@ -79,11 +80,13 @@ def load_observation_series(csv_path: str) -> np.ndarray:
 
     raise ValueError(
         "Unsupported CSV schema. Expected a headerless numeric series, a 'Hourly_Counts' column,"
-        f" or a 'Date' column with hourly columns. Got headers: {fieldnames}"
+        f" or a 'Date' column with hourly columns. Got headers: {fieldnames}",
     )
 
 
-def split_observations(series: np.ndarray, train_end: int = 180, test_start: int = 181) -> Tuple[np.ndarray, np.ndarray]:
+def split_observations(
+    series: np.ndarray, train_end: int = 180, test_start: int = 181,
+) -> Tuple[np.ndarray, np.ndarray]:
     """Return (train, test) splits using the observed notebook offsets."""
     if len(series) == 0:
         raise ValueError("Observation series is empty")
@@ -94,7 +97,7 @@ def split_observations(series: np.ndarray, train_end: int = 180, test_start: int
     return train, test
 
 
-def generate_init(n: int, seed: int | None = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def generate_init(n: int, seed: Optional[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Generate random (transition matrix, initial distribution, lambdas).
 
     Uses numpy's default_rng when seed provided for reproducibility.
@@ -108,12 +111,13 @@ def generate_init(n: int, seed: int | None = None) -> Tuple[np.ndarray, np.ndarr
     return theta, delta, lambdas
 
 
-def phmm(n: int, obs: List[np.ndarray], iterations: int = 50, seed: int | None = None):
+def phmm(n: int, obs: List[np.ndarray], iterations: int = 50, seed: Optional[int] = None):
     """Construct and train a PHMM instance using the observed API.
 
     This mirrors the behaviour previously present in exec_model.phmm().
     """
     from .PHMMs_fixed import PHMMs
+
     theta, delta, lambdas = generate_init(n, seed=seed)
     seq = np.array(obs[0])
     model = PHMMs(delta, theta, lambdas, seq, 1e-4)
@@ -121,7 +125,9 @@ def phmm(n: int, obs: List[np.ndarray], iterations: int = 50, seed: int | None =
     return model
 
 
-def run_with_m(m: int, obs: List[np.ndarray], iterations: int = 50, seed: int | None = None) -> List:
+def run_with_m(
+    m: int, obs: List[np.ndarray], iterations: int = 50, seed: Optional[int] = None,
+) -> List:
     models = []
     for nstate in range(1, m + 1):
         models.append(phmm(nstate, obs, iterations, seed=seed))

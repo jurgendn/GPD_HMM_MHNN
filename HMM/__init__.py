@@ -1,25 +1,25 @@
 from .PHMMs_fixed import PHMMs
 from .utils import (
-    load_observation_series,
-    split_observations,
-    generate_init,
-    phmm,
-    run_with_m,
     compute_aic_bic,
     compute_cdll,
-    select_base_model,
+    generate_init,
+    load_observation_series,
+    phmm,
     report_dwell_times,
+    run_with_m,
+    select_base_model,
+    split_observations,
 )
 
 __all__ = [
     "PHMMs",
-    "load_observation_series",
-    "split_observations",
-    "generate_init",
-    "phmm",
-    "run_with_m",
     "compute_aic_bic",
     "compute_cdll",
-    "select_base_model",
+    "generate_init",
+    "load_observation_series",
+    "phmm",
     "report_dwell_times",
+    "run_with_m",
+    "select_base_model",
+    "split_observations",
 ]

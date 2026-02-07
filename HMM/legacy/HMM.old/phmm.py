@@ -1,13 +1,11 @@
-import scipy as sp
 import numpy as np
+from numpy import seterr
 from scipy import stats
 from scipy.special import logsumexp
-from numpy import seterr
 
 
 class PHMM:
-    """
-    This class defines a Hidden Markov Model with Poisson emissions,
+    """This class defines a Hidden Markov Model with Poisson emissions,
     in which all observed sequences are assumed to have the same initial
     state probabilities, transition probabilities, and Poisson emission
     parameters. C.f. the PHMM_d class, which assumes each sequence to have
@@ -32,7 +30,7 @@ class PHMM:
         in order to stop training. Set to 10^-3 by default.
 
 
-    Attributes
+    Attributes:
     ----------
     nstates : int
         Number of states in the HMM.
@@ -51,13 +49,13 @@ class PHMM:
     """
 
     def __init__(self, init_delta, init_theta, init_lambdas, conv=1e-03):
-        seterr(divide='ignore')
+        seterr(divide="ignore")
         self.nstates = len(init_delta)
         self.delta = np.log(init_delta)
         self.theta = np.log(init_theta)
         self.lambdas = np.array(init_lambdas)
         self.conv = conv
-        seterr(divide='warn')
+        seterr(divide="warn")
 
     """
     Returns the transition probability matrix (NOT log probabilities)
@@ -155,9 +153,9 @@ class PHMM:
                 return out_seq[-2] != -1
             else:
                 return len(out_seq) < n
+
         while condition():
-            state = np.random.choice(
-                a=self.nstates, p=np.exp(self.theta[state]))
+            state = np.random.choice(a=self.nstates, p=np.exp(self.theta[state]))
             out_seq.append(self._sp_rvs(self.lambdas[state]))
             states.append(state)
         return out_seq, states
@@ -178,9 +176,8 @@ class PHMM:
     """
 
     def forward_lprobs(self, seq):
-        seterr(divide='ignore')
-        g_1 = [self._sp_lpmf(self.lambdas[i], seq[0])
-               for i in range(self.nstates)]
+        seterr(divide="ignore")
+        g_1 = [self._sp_lpmf(self.lambdas[i], seq[0]) for i in range(self.nstates)]
         g_1 = np.add(self.delta, g_1)
         glst = [g_1]
         for i in range(1, len(seq)):
@@ -192,7 +189,7 @@ class PHMM:
                 g_i.append(g_ij)
             glst.append(g_i)
         g_n = glst[-1]
-        seterr(divide='warn')
+        seterr(divide="warn")
         return np.array(glst)
 
     """
@@ -229,9 +226,8 @@ class PHMM:
     """
 
     def backward_lprobs(self, seq):
-        seterr(divide='ignore')
-        f_n = [self._sp_lpmf(self.lambdas[i], seq[-1])
-               for i in range(self.nstates)]
+        seterr(divide="ignore")
+        f_n = [self._sp_lpmf(self.lambdas[i], seq[-1]) for i in range(self.nstates)]
         flst = [f_n]
         for i in range(len(seq) - 2, -1, -1):
             f_i = []
@@ -242,7 +238,7 @@ class PHMM:
                 f_i.append(f_ij)
             flst.append(f_i)
         flst.reverse()
-        seterr(divide='warn')
+        seterr(divide="warn")
         return np.array(flst)
 
     """
@@ -285,8 +281,9 @@ class PHMM:
         bprobs = self.backward_lprobs(seq)
         probs = np.add(fprobs, bprobs)
         probsums = list(map(logsumexp, probs))
-        norm_probs = list(map(lambda lst, sum_: list(
-            map(lambda x: x - sum_, lst)), probs, probsums))
+        norm_probs = list(
+            map(lambda lst, sum_: list(map(lambda x: x - sum_, lst)), probs, probsums),
+        )
         return np.exp(norm_probs)
 
     """
@@ -335,8 +332,7 @@ class PHMM:
             for j in range(self.nstates):
                 all_v_ij = []
                 for k in range(self.nstates):
-                    temp = self.theta[j, k] + \
-                        self._sp_lpmf(self.lambdas[k], seq[i])
+                    temp = self.theta[j, k] + self._sp_lpmf(self.lambdas[k], seq[i])
                     temp += vlst[-1][k]
                     all_v_ij.append(temp)
                 v_i.append(max(all_v_ij))
@@ -344,8 +340,7 @@ class PHMM:
             vlst.append(v_i)
             wlst.append(w_i)
         wlst.reverse()
-        first_prob = [self._sp_lpmf(self.lambdas[i], seq[0])
-                      for i in range(self.nstates)]
+        first_prob = [self._sp_lpmf(self.lambdas[i], seq[0]) for i in range(self.nstates)]
         first_prob = np.add(first_prob, self.delta)
         first_prob = np.add(first_prob, vlst[-1])
         h_1 = np.argmax(first_prob)
@@ -424,8 +419,7 @@ class PHMM:
                     for j in range(self.nstates):
                         t_i_hat.append(rlst[-1][j] + np.add(trans[j], flst[i]))
                     t_i_sum = logsumexp(t_i_hat)
-                    t_i = list(map(lambda lst: list(
-                        map(lambda t: t - t_i_sum, lst)), t_i_hat))
+                    t_i = list(map(lambda lst: list(map(lambda t: t - t_i_sum, lst)), t_i_hat))
                     r_i = np.array(list(map(logsumexp, zip(*t_i))))
                     tlst.append(t_i)
                     rlst.append(r_i)
@@ -462,8 +456,9 @@ class PHMM:
                     t_ij = [trans_lst[t][j][l] for t in range(len(trans_lst))]
                     expd_trans[j].append(logsumexp(t_ij))
             totals = list(map(logsumexp, expd_trans))
-            new_trans = list(map(lambda tlst, t: list(
-                map(lambda et: et - t, tlst)), expd_trans, totals))
+            new_trans = list(
+                map(lambda tlst, t: list(map(lambda et: et - t, tlst)), expd_trans, totals),
+            )
             trans = np.array(new_trans)
             # Apply updates
             self.delta = new_delta
@@ -473,8 +468,8 @@ class PHMM:
 
 
 def AIC(model, obs):
-    return (2*(model.nstates**2) - 2*model.log_likelihood(obs))
+    return 2 * (model.nstates**2) - 2 * model.log_likelihood(obs)
 
 
 def BIC(model, obs):
-    return ((model.nstates**2)*np.log(len(obs[0])) - 2*model.log_likelihood(obs))
+    return (model.nstates**2) * np.log(len(obs[0])) - 2 * model.log_likelihood(obs)
