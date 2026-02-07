@@ -1,9 +1,5 @@
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-import scipy as sc
-
-import PHMMs as phm
 import statsmodels.tsa.stattools as ts
 
 df = pd.read_csv("traffic count.csv")
@@ -18,4 +14,4 @@ for dt in data:
 t = [i for i in range(len(data_all))]
 plt.plot(t, data_all)
 
-print(ts.adfuller(data_all, regression='c'))
+print(ts.adfuller(data_all, regression="c"))
