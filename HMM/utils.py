@@ -10,7 +10,7 @@ behaviour introduced.
 
 import csv
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import Optional
 
 import numpy as np
 
@@ -37,7 +37,7 @@ def load_observation_series(csv_path: str) -> np.ndarray:
         def _parse_numeric_token(token: str) -> int:
             return int(float(token))
 
-        plain_values: List[int] = []
+        plain_values: list[int] = []
         plain_ok = True
         for ln in lines:
             token = ln.split(",")[0].strip()
@@ -57,7 +57,7 @@ def load_observation_series(csv_path: str) -> np.ndarray:
         fieldnames = [name.strip() if name is not None else "" for name in reader.fieldnames]
 
         if "Hourly_Counts" in fieldnames:
-            values: List[int] = []
+            values: list[int] = []
             for row in reader:
                 raw = row.get("Hourly_Counts", "")
                 if raw is None or str(raw).strip() == "":
@@ -86,7 +86,7 @@ def load_observation_series(csv_path: str) -> np.ndarray:
 
 def split_observations(
     series: np.ndarray, train_end: int = 180, test_start: int = 181,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Return (train, test) splits using the observed notebook offsets."""
     if len(series) == 0:
         raise ValueError("Observation series is empty")
@@ -97,7 +97,7 @@ def split_observations(
     return train, test
 
 
-def generate_init(n: int, seed: Optional[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def generate_init(n: int, seed: Optional[int] = None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Generate random (transition matrix, initial distribution, lambdas).
 
     Uses numpy's default_rng when seed provided for reproducibility.
@@ -111,7 +111,7 @@ def generate_init(n: int, seed: Optional[int] = None) -> Tuple[np.ndarray, np.nd
     return theta, delta, lambdas
 
 
-def phmm(n: int, obs: List[np.ndarray], iterations: int = 50, seed: Optional[int] = None):
+def phmm(n: int, obs: list[np.ndarray], iterations: int = 50, seed: Optional[int] = None) -> object:
     """Construct and train a PHMM instance using the observed API.
 
     This mirrors the behaviour previously present in exec_model.phmm().
@@ -121,33 +121,38 @@ def phmm(n: int, obs: List[np.ndarray], iterations: int = 50, seed: Optional[int
     theta, delta, lambdas = generate_init(n, seed=seed)
     seq = np.array(obs[0])
     model = PHMMs(delta, theta, lambdas, seq, 1e-4)
-    model.Baum_Welch(iterations)
+    model.baum_welch(iterations)
     return model
 
 
 def run_with_m(
-    m: int, obs: List[np.ndarray], iterations: int = 50, seed: Optional[int] = None,
-) -> List:
+    m: int, obs: list[np.ndarray], iterations: int = 50, seed: Optional[int] = None,
+) -> list:
+    """Train models with 1..m states on observation sequences."""
     models = []
     for nstate in range(1, m + 1):
         models.append(phmm(nstate, obs, iterations, seed=seed))
     return models
 
 
-def compute_aic_bic(model_list: List) -> Tuple[List[float], List[float]]:
-    aic = [m.AIC() for m in model_list]
-    bic = [m.BIC() for m in model_list]
+def compute_aic_bic(model_list: list) -> tuple[list[float], list[float]]:
+    """Compute AIC and BIC for a list of models."""
+    aic = [m.aic() for m in model_list]
+    bic = [m.bic() for m in model_list]
     return aic, bic
 
 
-def compute_cdll(model_list: List) -> List[float]:
+def compute_cdll(model_list: list) -> list[float]:
+    """Compute complete data log-likelihood for a list of models."""
     return [mdl.check() for mdl in model_list]
 
 
-def select_base_model(models: List, preferred_index: int = 4) -> int:
+def select_base_model(models: list, preferred_index: int = 4) -> int:
+    """Select base model index, clamped to available models."""
     return min(preferred_index, len(models) - 1)
 
 
 def report_dwell_times(matrix: np.ndarray) -> None:
+    """Print expected dwell times from transition matrix."""
     for i in range(min(5, matrix.shape[0])):
         print(1 / (1 - matrix[i][i]))
