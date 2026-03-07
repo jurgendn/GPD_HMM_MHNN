@@ -4,8 +4,15 @@
 [![NumPy](https://img.shields.io/badge/NumPy-required-013243?logo=numpy&logoColor=white)](https://numpy.org/)
 [![SciPy](https://img.shields.io/badge/SciPy-required-8CAAE6?logo=scipy&logoColor=white)](https://scipy.org/)
 [![Matplotlib](https://img.shields.io/badge/Matplotlib-required-11557C)](https://matplotlib.org/)
+[![Thesis Folder](https://img.shields.io/badge/thesis-folder-0F9D58?logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1HzpJiQ7GykVYVql5ei1e7fsOODuzxEmH?usp=sharing)
+[![Thesis (English)](https://img.shields.io/badge/thesis-en-0F9D58?logo=googledrive&logoColor=white)](https://drive.google.com/file/d/15XYR4TT4UQZu7sOrZPtwQK_9iZoHkyvt/view?usp=sharing)
+[![Thesis (Vietnamese)](https://img.shields.io/badge/thesis-vi-0F9D58?logo=googledrive&logoColor=white)](https://drive.google.com/file/d/14QrVjtIg8m-wlFeyTHPhPOZkppqYiUKN/view?usp=sharing)
 
 This repository accompanies the report on modeling over-dispersed count time series with Poisson Hidden Markov Models (PHMMs). It contains a minimal Python implementation used to fit traffic-count data, select the number of hidden states, and visualize regime-dependent dynamics.
+
+- PDF: https://drive.google.com/drive/folders/1HzpJiQ7GykVYVql5ei1e7fsOODuzxEmH?usp=sharing
+- PDF - English: https://drive.google.com/file/d/15XYR4TT4UQZu7sOrZPtwQK_9iZoHkyvt/view?usp=sharing
+- PDF - Vietnamese: https://drive.google.com/file/d/14QrVjtIg8m-wlFeyTHPhPOZkppqYiUKN/view?usp=sharing
 
 ## What this project does
 - Implements a PHMM with Poisson emissions and EM/Baum–Welch training. The core code lives in [HMM/PHMMs_fixed.py](HMM/PHMMs_fixed.py).
